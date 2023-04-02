@@ -2,37 +2,44 @@ package com.OSP.ISF.service;
 
 import com.OSP.ISF.dto.Order;
 import com.OSP.ISF.dto.StoreConfig;
+import com.OSP.ISF.exception.PickerNotFoundException;
 
+import java.time.Duration;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class OrderAssigner {
 
-    public Map<String, List<Order>> assignOrdersToPickers(StoreConfig storeConfig, List<Order> orders) {
-        Map<String, List<Order>> assignedOrders = new HashMap<>();
-        List<String> pickers = storeConfig.getPickers();
-        int orderIndex = 0;
-        LocalTime workStartTime = storeConfig.getPickingStartTime();
+    private Map<String, List<Order>> assignedOrders = new HashMap<>();
 
-        while (workStartTime.isBefore(storeConfig.getPickingEndTime()) && orderIndex < orders.size()) {
-            for (int i = 0; i < pickers.size() && orderIndex < orders.size(); i++) {
-                String pickerId = pickers.get(i);
-                List<Order> pickerOrders = assignedOrders.getOrDefault(pickerId, new ArrayList<>());
-                Order order = orders.get(orderIndex);
-                if (order.getCompleteBy().isBefore(workStartTime.plus(order.getPickingTime()))) {
-                    continue;
-                }
-                pickerOrders.add(order);
-                assignedOrders.put(pickerId, pickerOrders);
-                System.out.println("Picker ID: " + pickerId + ", Order Index: " + order.getOrderId() + ", Picking Start Time: " + workStartTime);
-                orderIndex++;
-                workStartTime = workStartTime.plus(order.getPickingTime());
+    public Map<String, List<Order>> assignOrdersToPickers(StoreConfig storeConfig, List<Order> orders,
+                                                          Comparator<Order> comparator) {
+        storeConfig.getPickers().forEach(picker -> assignedOrders.put(picker, new ArrayList<>()));
+        orders.sort(comparator);
+        orders.forEach(order -> {
+            Map.Entry<String, LocalTime> earliestFinishedPicker =
+                    getEarliestFinishedPicker(storeConfig.getPickingStartTime());
+
+            if(earliestFinishedPicker.getValue().plus(order.getPickingTime()).isBefore(order.getCompleteBy())) {
+                assignedOrders.get(earliestFinishedPicker.getKey()).add(order);
+            } else {
+                System.out.println("No free picker");
             }
-        }
-
+        });
         return assignedOrders;
     }
+    private Map.Entry<String, LocalTime> getEarliestFinishedPicker(LocalTime pickingStartTime) {
+        Map<String, LocalTime> mapOfFinishedPickers = new HashMap<>();
+        assignedOrders.forEach((key, value) -> {
+            Duration durationSum = Duration.ZERO;
+            for(Duration duration : value.stream().map(Order::getPickingTime).toList()) {
+                durationSum = durationSum.plusMinutes(duration.toMinutes());
+            }
+            mapOfFinishedPickers.put(key, pickingStartTime.plusMinutes(durationSum.toMinutes()));
+        });
+        Optional<Map.Entry<String, LocalTime>> maxEntry =
+                mapOfFinishedPickers.entrySet().stream().min(Map.Entry.comparingByValue());
+        return maxEntry.orElseThrow(PickerNotFoundException::new);
+    }
 }
+
