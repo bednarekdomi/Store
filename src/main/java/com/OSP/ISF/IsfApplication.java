@@ -52,7 +52,6 @@ public class IsfApplication {
         orders.add(orderSix);
 
         OrderAssigner orderAssigner = new OrderAssigner();
-        Double value = orderOne.valuePerTime(orderOne.getOrderValue(), orderOne.getPickingTime());
-        System.out.println(value);
+        Map<String, List<Order>> testMap = orderAssigner.assignOrdersToPickers(storeConfig, orders);
     }
 }
