@@ -22,6 +22,6 @@ public class Order {
 
     public double valuePerTime(BigDecimal orderValue, Duration pickingTime){
         double minutes = pickingTime.toMinutes();
-        return BigDecimal.valueOf(minutes).divide(orderValue, 2, RoundingMode.HALF_UP).doubleValue();
+        return orderValue.divide(BigDecimal.valueOf(minutes), 2, RoundingMode.HALF_UP).doubleValue();
     }
 }
