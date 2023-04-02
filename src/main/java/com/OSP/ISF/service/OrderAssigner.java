@@ -27,7 +27,7 @@ public class OrderAssigner {
                 }
                 pickerOrders.add(order);
                 assignedOrders.put(pickerId, pickerOrders);
-                System.out.println("Picker ID: " + pickerId + ", Order Index: " + orderIndex + ", Picking Start Time: " + workStartTime);
+                System.out.println("Picker ID: " + pickerId + ", Order Index: " + order.getOrderId() + ", Picking Start Time: " + workStartTime);
                 orderIndex++;
                 workStartTime = workStartTime.plus(order.getPickingTime());
             }

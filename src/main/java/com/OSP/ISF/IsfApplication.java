@@ -18,16 +18,16 @@ import java.util.Map;
 public class IsfApplication {
 
     public static void main(String[] args) {
-        if (args.length < 2) {
-            System.out.println("Paths to configuration files are not specified");
-            return;
-        }
-
-        String storeFilePath = args[0];
-        String ordersFilePath = args[1];
-
-        StoreConfig storeConfig = DataReader.readStoreConfig(storeFilePath);
-        OrderList orderList = DataReader.readOrders(ordersFilePath);
+//        if (args.length < 2) {
+//            System.out.println("Paths to configuration files are not specified");
+//            return;
+//        }
+//
+//        String storeFilePath = args[0];
+//        String ordersFilePath = args[1];
+//
+//        StoreConfig storeConfig = DataReader.readStoreConfig(storeFilePath);
+//        OrderList orderList = DataReader.readOrders(ordersFilePath);
 
         List<String> pickers = new ArrayList<>();
         pickers.add("Picker1");
@@ -40,7 +40,7 @@ public class IsfApplication {
         Order orderOne = new Order("order-1", BigDecimal.valueOf(52.40), Duration.ofMinutes(15), LocalTime.of(15, 00));
         Order orderTwo = new Order("order-2", BigDecimal.valueOf(50.40), Duration.ofMinutes(20), LocalTime.of(16, 00));
         Order orderThree = new Order("order-3", BigDecimal.valueOf(50.40), Duration.ofMinutes(30), LocalTime.of(17, 00));
-        Order orderFour= new Order("order-4", BigDecimal.valueOf(50.40), Duration.ofMinutes(20), LocalTime.of(17, 00));
+        Order orderFour = new Order("order-4", BigDecimal.valueOf(50.40), Duration.ofMinutes(20), LocalTime.of(17, 00));
         Order orderFive = new Order("order-5", BigDecimal.valueOf(50.40), Duration.ofMinutes(20), LocalTime.of(17, 00));
         Order orderSix = new Order("order-6", BigDecimal.valueOf(50.40), Duration.ofMinutes(20), LocalTime.of(17, 00));
         List<Order> orders = new ArrayList<>();
@@ -52,6 +52,7 @@ public class IsfApplication {
         orders.add(orderSix);
 
         OrderAssigner orderAssigner = new OrderAssigner();
-        Map<String, List<Order>> testMap = orderAssigner.assignOrdersToPickers(storeConfig, orders);
+        Double value = orderOne.valuePerTime(orderOne.getOrderValue(), orderOne.getPickingTime());
+        System.out.println(value);
     }
 }
